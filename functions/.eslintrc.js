@@ -9,5 +9,6 @@ module.exports = {
   },
   rules: {
     quotes: ["error", "double", { allowTemplateLiterals: true }],
+    "linebreak-style": ["error", "unix"],
   },
 };

@@ -6,7 +6,7 @@ const {
   Volunteer,
   User,
 } = require("./models");
-const { auth } = require("../firebase");
+const { auth } = require("./firebase");
 
 // User Controller
 class UserController {
