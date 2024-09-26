@@ -1,4 +1,4 @@
-const { Donation, Feedback, Receiver, Volunteer } = require("./models");
+const { Donation, Feedback, Receiver, Volunteer, User } = require("./models");
 
 // Donor Controller
 class DonorController {
@@ -91,70 +91,69 @@ class ReceiverController {
   }
 }
 
-// // User Controller (Placeholder for models.User)
-// // Assume a User model similar to the Firebase model structure is created
-// class UserController {
-//   static async createUser(req, res) {
-//     try {
-//       const userData = req.body;
-//       const user = await User.create(userData);
-//       return res.status(201).json(user);
-//     } catch (error) {
-//       return res.status(500).json({ error: error.message });
-//     }
-//   }
+// User Controller
+class UserController {
+  static async createUser(req, res) {
+    try {
+      const userData = req.body;
+      const user = await User.create(userData);
+      return res.status(201).json(user);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 
-//   static async getUserById(req, res) {
-//     try {
-//       const id = req.params.id;
-//       const user = await User.findById(id);
-//       if (!user) {
-//         return res.status(404).json({ error: "User not found" });
-//       }
-//       return res.status(200).json(user);
-//     } catch (error) {
-//       return res.status(500).json({ error: error.message });
-//     }
-//   }
+  static async getUserById(req, res) {
+    try {
+      const id = req.params.id;
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      return res.status(200).json(user);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 
-//   static async updateUser(req, res) {
-//     try {
-//       const id = req.params.id;
-//       const userData = req.body;
-//       await User.update(id, userData);
-//       const updatedUser = await User.findById(id);
-//       return res.status(200).json(updatedUser);
-//     } catch (error) {
-//       return res.status(500).json({ error: error.message });
-//     }
-//   }
+  static async updateUser(req, res) {
+    try {
+      const id = req.params.id;
+      const userData = req.body;
+      await User.update(id, userData);
+      const updatedUser = await User.findById(id);
+      return res.status(200).json(updatedUser);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 
-//   static async deleteUser(req, res) {
-//     try {
-//       const id = req.params.id;
-//       await User.delete(id);
-//       return res.status(204).send();
-//     } catch (error) {
-//       return res.status(500).json({ error: error.message });
-//     }
-//   }
+  static async deleteUser(req, res) {
+    try {
+      const id = req.params.id;
+      await User.delete(id);
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 
-//   static async getAllUsers(req, res) {
-//     try {
-//       const users = await User.findAll();
-//       return res.status(200).json(users);
-//     } catch (error) {
-//       return res.status(500).json({ error: error.message });
-//     }
-//   }
-// }
+  static async getAllUsers(req, res) {
+    try {
+      const users = await User.findAll();
+      return res.status(200).json(users);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+}
 
 // Volunteer Controller
 class VolunteerController {
   static async getNotifications(req, res) {
     try {
       const userId = req.query.userId;
-      const notifications = await Notification.findByUserId(userId);
+      const notifications = await Volunteer.findByUserId(userId); // Ensure this line refers to the correct model for notifications
       return res.status(200).json(notifications);
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -164,7 +163,7 @@ class VolunteerController {
   static async notifyVolunteers(req, res) {
     try {
       const notificationData = req.body;
-      const notification = await Notification.create(notificationData);
+      const notification = await Volunteer.create(notificationData); // Ensure this line refers to the correct model for notifications
       return res.status(201).json(notification);
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -175,6 +174,6 @@ class VolunteerController {
 module.exports = {
   DonorController,
   ReceiverController,
-  //   UserController,
+  UserController,
   VolunteerController,
 };

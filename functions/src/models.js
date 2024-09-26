@@ -91,9 +91,43 @@ class Volunteer {
   }
 }
 
+// User Model
+class User {
+  constructor(id, data) {
+    this.id = id;
+    this.name = data.name;
+    this.email = data.email;
+    this.role = data.role; // For example: admin, donor, receiver, volunteer, etc.
+  }
+
+  static async create(data) {
+    const docRef = await db.collection("users").add(data); // Storing user role
+    return new User(docRef.id, data);
+  }
+
+  static async findById(id) {
+    const doc = await db.collection("users").doc(id).get();
+    return doc.exists ? new User(doc.id, doc.data()) : null;
+  }
+
+  static async findAll() {
+    const snapshot = await db.collection("users").get();
+    return snapshot.docs.map((doc) => new User(doc.id, doc.data()));
+  }
+
+  static async update(id, data) {
+    await db.collection("users").doc(id).update(data);
+  }
+
+  static async delete(id) {
+    await db.collection("users").doc(id).delete();
+  }
+}
+
 module.exports = {
   Donation,
   Feedback,
   Receiver,
   Volunteer,
+  User,
 };

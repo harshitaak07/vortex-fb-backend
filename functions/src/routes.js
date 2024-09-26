@@ -8,6 +8,7 @@ const {
   VolunteerController,
 } = require("../controllers");
 const authenticate = require("../middleware/auth");
+const { sendNotification } = require("./notifications");
 
 // User Routes
 router.post("/user", UserController.createUser);
@@ -28,6 +29,7 @@ router.put("/receiver/:id", authenticate, ReceiverController.updateProfile);
 router.post("/receiver/feedback", authenticate, ReceiverController.addFeedback);
 router.get("/receivers/donors", authenticate, ReceiverController.getAllDonors);
 
+// Volunteer Routes
 router.get(
   "/volunteer/notifications",
   authenticate,
@@ -38,5 +40,22 @@ router.post(
   authenticate,
   VolunteerController.notifyVolunteers
 );
+
+router.post("/send-notification", authenticate, async (req, res) => {
+  const { token, title, body } = req.body;
+
+  if (!token || !title || !body) {
+    return res
+      .status(400)
+      .json({ error: "Token, title, and body are required." });
+  }
+
+  try {
+    const response = await sendNotification(token, title, body);
+    return res.status(200).json({ success: true, response });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to send notification." });
+  }
+});
 
 module.exports = router;
