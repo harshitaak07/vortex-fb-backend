@@ -1,31 +1,77 @@
 const { db } = require("../firebase");
 
-// Donations Model
-class Donation {
+// User Model
+class User {
   constructor(id, data) {
     this.id = id;
-    this.amount = data.amount;
-    this.receiverId = data.receiverId;
-    this.donorId = data.donorId;
-    this.message = data.message;
+    this.name = data.name;
+    this.email = data.email;
+    this.role = data.role;
+    // this.phoneNumber = data.phoneNumber;
+    // this.address = data.address;
+    // this.latitude = data.latitude;
+    // this.longitude = data.longitude;
   }
 
   static async create(data) {
+    const docRef = await db.collection("User").add(data);
+    return new User(docRef.id, data);
+  }
+
+  static async findById(id) {
+    const doc = await db.collection("User").doc(id).get();
+    return doc.exists ? new User(doc.id, doc.data()) : null;
+  }
+
+  static async findAll() {
+    const snapshot = await db.collection("User").get();
+    return snapshot.docs.map((doc) => new User(doc.id, doc.data()));
+  }
+
+  static async update(id, data) {
+    await db.collection("User").doc(id).update(data);
+  }
+
+  static async delete(id) {
+    await db.collection("User").doc(id).delete();
+  }
+}
+
+// donati Model
+class donation {
+  constructor(id, data) {
+    this.id = id;
+    this.donorId = data.donorId;
+    this.receiverId = data.receiverId;
+    this.foodForPeople = data.foodForPeople;
+    this.foodUsedFor = data.foodUsedFor;
+    this.description = data.description;
+    this.expiry = data.expiry;
+    this.canDeliver = data.canDeliver;
+    this.status = data.status;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+  }
+
+  static async create(data) {
+    data.createdAt = new Date();
+    data.updatedAt = new Date();
     const docRef = await db.collection("donations").add(data);
-    return new Donation(docRef.id, data);
+    return new donation(docRef.id, data);
   }
 
   static async findById(id) {
     const doc = await db.collection("donations").doc(id).get();
-    return doc.exists ? new Donation(doc.id, doc.data()) : null;
+    return doc.exists ? new donation(doc.id, doc.data()) : null;
   }
 
   static async findAll() {
     const snapshot = await db.collection("donations").get();
-    return snapshot.docs.map((doc) => new Donation(doc.id, doc.data()));
+    return snapshot.docs.map((doc) => new donation(doc.id, doc.data()));
   }
 
   static async update(id, data) {
+    data.updatedAt = new Date();
     await db.collection("donations").doc(id).update(data);
   }
 
@@ -38,11 +84,18 @@ class Donation {
 class Feedback {
   constructor(id, data) {
     this.id = id;
-    this.message = data.message;
-    this.userId = data.userId;
+    this.donationId = data.donationId;
+    this.receiverId = data.receiverId;
+    this.experience = data.experience;
+    this.peopleFed = data.peopleFed;
+    this.photos = data.photos;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
   }
 
   static async create(data) {
+    data.createdAt = new Date();
+    data.updatedAt = new Date();
     const docRef = await db.collection("feedback").add(data);
     return new Feedback(docRef.id, data);
   }
@@ -53,81 +106,86 @@ class Feedback {
   }
 }
 
-// Receivers Model
+// Notification Model
+class Notification {
+  constructor(id, data) {
+    this.id = id;
+    this.userId = data.userId;
+    this.donationId = data.donationId;
+    this.message = data.message;
+    this.read = data.read;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+  }
+
+  static async create(data) {
+    data.createdAt = new Date();
+    data.updatedAt = new Date();
+    data.read = false;
+    const docRef = await db.collection("Notification").add(data);
+    return new Notification(docRef.id, data);
+  }
+
+  static async findAll() {
+    const snapshot = await db.collection("Notification").get();
+    return snapshot.docs.map((doc) => new Notification(doc.id, doc.data()));
+  }
+}
+
+// Receiver Model (as a subcollection of U)
 class Receiver {
-  constructor(id, data) {
-    this.id = id;
-    this.name = data.name;
-    this.contactInfo = data.contactInfo;
+  constructor(userId, data) {
+    this.userId = userId;
+    this.approxPeopleFed = data.approxPeopleFed;
+    this.bioData = data.bioData;
   }
 
-  static async create(data) {
-    const docRef = await db.collection("receivers").add(data);
-    return new Receiver(docRef.id, data);
+  static async create(userId, data) {
+    await db.collection("User").doc(userId).collection("receivers").add(data);
+    return new Receiver(userId, data);
   }
 
-  static async findAll() {
-    const snapshot = await db.collection("receivers").get();
-    return snapshot.docs.map((doc) => new Receiver(doc.id, doc.data()));
+  static async findByUserId(userId) {
+    const snapshot = await db
+      .collection("User")
+      .doc(userId)
+      .collection("receivers")
+      .get();
+    const doc = snapshot.docs[0];
+    return doc ? new Receiver(userId, doc.data()) : null;
   }
 }
 
-// Volunteers Model
+// Volunteer Model (as a subcollection of U)
 class Volunteer {
-  constructor(id, data) {
-    this.id = id;
-    this.name = data.name;
-    this.contactInfo = data.contactInfo;
+  constructor(userId, data) {
+    this.userId = userId;
+    this.latitude = data.latitude;
+    this.longitude = data.longitude;
+    this.active = data.active;
   }
 
-  static async create(data) {
-    const docRef = await db.collection("volunteers").add(data);
-    return new Volunteer(docRef.id, data);
+  static async create(userId, data) {
+    await db.collection("User").doc(userId).collection("volunteers").add(data);
+    return new Volunteer(userId, data);
   }
 
-  static async findAll() {
-    const snapshot = await db.collection("volunteers").get();
-    return snapshot.docs.map((doc) => new Volunteer(doc.id, doc.data()));
-  }
-}
-
-// User Model
-class User {
-  constructor(id, data) {
-    this.id = id;
-    this.name = data.name;
-    this.email = data.email;
-    this.role = data.role; // For example: admin, donor, receiver, volunteer, etc.
-  }
-
-  static async create(data) {
-    const docRef = await db.collection("users").add(data); // Storing user role
-    return new User(docRef.id, data);
-  }
-
-  static async findById(id) {
-    const doc = await db.collection("users").doc(id).get();
-    return doc.exists ? new User(doc.id, doc.data()) : null;
-  }
-
-  static async findAll() {
-    const snapshot = await db.collection("users").get();
-    return snapshot.docs.map((doc) => new User(doc.id, doc.data()));
-  }
-
-  static async update(id, data) {
-    await db.collection("users").doc(id).update(data);
-  }
-
-  static async delete(id) {
-    await db.collection("users").doc(id).delete();
+  static async findByUserId(userId) {
+    const snapshot = await db
+      .collection("User")
+      .doc(userId)
+      .collection("volunteers")
+      .get();
+    const doc = snapshot.docs[0];
+    return doc ? new Volunteer(userId, doc.data()) : null;
   }
 }
 
 module.exports = {
-  Donation,
+  User,
+  donation,
   Feedback,
+  Notification,
   Receiver,
   Volunteer,
-  User,
 };

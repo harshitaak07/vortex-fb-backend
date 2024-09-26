@@ -13,8 +13,8 @@ const { sendNotification } = require("./notifications");
 // User Routes
 router.post("/user", UserController.createUser);
 router.get("/user/:id", authenticate, UserController.getUserById);
-router.put("/user/:id", authenticate, UserController.updateUser);
-router.delete("/user/:id", authenticate, UserController.deleteUser);
+router.put("/user", authenticate, UserController.updateUser);
+router.delete("/user", authenticate, UserController.deleteUser);
 router.get("/users", authenticate, UserController.getAllUsers);
 
 // Donor Routes
@@ -25,7 +25,7 @@ router.put("/donation/:id", authenticate, DonorController.updateDonation);
 router.delete("/donation/:id", authenticate, DonorController.deleteDonation);
 
 // Receiver Routes
-router.put("/receiver/:id", authenticate, ReceiverController.updateProfile);
+router.put("/receiver/profile", authenticate, ReceiverController.updateProfile);
 router.post("/receiver/feedback", authenticate, ReceiverController.addFeedback);
 router.get("/receivers/donors", authenticate, ReceiverController.getAllDonors);
 
@@ -40,7 +40,13 @@ router.post(
   authenticate,
   VolunteerController.notifyVolunteers
 );
+router.put(
+  "/volunteer/status",
+  authenticate,
+  VolunteerController.updateVolunteerStatus
+); // Added route to update volunteer status
 
+// Notification Route
 router.post("/send-notification", authenticate, async (req, res) => {
   const { token, title, body } = req.body;
 
